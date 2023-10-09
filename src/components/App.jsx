@@ -12,7 +12,9 @@ export class App extends Component {
     filter: '',
   }
   setContacts = (name, number) => {
-    console.log(this.state.contacts.length)
+    if (this.state.contacts.some(contact => contact.name === name)) {
+      return
+    }
     this.setState({
       contacts: [...this.state.contacts, { name, number, id: nanoid() }],
 
@@ -29,13 +31,26 @@ export class App extends Component {
       }
     })
   }
+
+
   componentDidUpdate(prevProps, prevState,) {
+    if (prevProps === this.state.contacts) {
+      return
+    }
     if (this.state.contacts.length !== prevState.contacts.length) {
       const allContacsLocalStorige = JSON.stringify(this.state.contacts);
-      console.log(allContacsLocalStorige)
       localStorage.setItem('contact', allContacsLocalStorige)
     }
   }
+  componentDidMount() {
+    const stringContact = localStorage.getItem('contact')
+    const parseContact = JSON.parse(stringContact) ?? [];
+    this.setState({
+      contacts: parseContact,
+    }
+    )
+  }
+
 
   render() {
     const fileredContacts = !this.state.filter ? this.state.contacts : this.state.contacts.filter(({ name }) => name.toLowerCase().includes(this.state.filter))
